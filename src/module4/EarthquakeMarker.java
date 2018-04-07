@@ -52,7 +52,16 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 		float magnitude = Float.parseFloat(properties.get("magnitude").toString());
 		properties.put("radius", 2*magnitude );
 		setProperties(properties);
-		this.radius = 1.75f*getMagnitude();
+		//this.radius = 2.5f*getMagnitude();
+		if(getMagnitude()<THRESHOLD_LIGHT){
+			this.radius=6;
+		}
+		if(getMagnitude()>=THRESHOLD_LIGHT && getMagnitude()<THRESHOLD_MODERATE){
+			this.radius=10;
+		}
+		if(getMagnitude()>=THRESHOLD_MODERATE){
+			this.radius=15;
+		}
 	}
 	
 
@@ -67,11 +76,19 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 		// call abstract method implemented in child class to draw marker shape
 		drawEarthquake(pg, x, y);
 		
-		// OPTIONAL TODO: draw X over marker if within past day		
-		
+		// OPTIONAL TODO: draw X over marker if within past day
+		ageDetermine(pg, x, y);
 		// reset to previous styling
 		pg.popStyle();
 		
+	}
+
+	private void ageDetermine(PGraphics pg, float x, float y){
+		if(getAge().equals("Past Day")){
+			pg.fill(0,0,0);
+			pg.line(x-9,y-9,x+9,y+9);
+			pg.line(x-9,y+9,x+9,y-9);
+		}
 	}
 	
 	// determine color of marker from depth, and set pg's fill color 
@@ -81,6 +98,15 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 	// You might find the getters below helpful.
 	private void colorDetermine(PGraphics pg) {
 		//TODO: Implement this method
+		if(getDepth()<THRESHOLD_INTERMEDIATE){
+			pg.fill(255,255,0);
+		}
+		if(getDepth()>=THRESHOLD_INTERMEDIATE && getDepth()<THRESHOLD_DEEP){
+			pg.fill(0,0,255);
+		}
+		if(getDepth()>=THRESHOLD_DEEP){
+			pg.fill(255,0,0);
+		}
 	}
 	
 	
@@ -97,10 +123,13 @@ public abstract class EarthquakeMarker extends SimplePointMarker
 	}
 	
 	public String getTitle() {
-		return (String) getProperty("title");	
-		
+		return (String) getProperty("title");
 	}
-	
+
+	public String getAge() {
+		return (String) getProperty("age");
+	}
+
 	public float getRadius() {
 		return Float.parseFloat(getProperty("radius").toString());
 	}

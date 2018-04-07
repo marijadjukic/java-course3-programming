@@ -146,6 +146,12 @@ public class EarthquakeCityMap extends PApplet {
 	private void selectMarkerIfHover(List<Marker> markers)
 	{
 		// TODO: Implement this method
+		for(Marker m : markers){
+			if(m.isInside(map, mouseX, mouseY)){
+				m.setSelected(true);
+				lastSelected = (CommonMarker) m;
+			}
+		}
 	}
 	
 	/** The event handler for mouse clicks
@@ -313,6 +319,11 @@ public class EarthquakeCityMap extends PApplet {
 			return true;
 		}
 		return false;
+	}
+
+	public static void main (String... args) {
+		EarthquakeCityMap ecm = new EarthquakeCityMap();
+		PApplet.runSketch(new String[]{"Earthquake City Map"}, ecm);
 	}
 
 }
