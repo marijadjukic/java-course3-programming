@@ -13,6 +13,7 @@ import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
+import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
@@ -24,160 +25,226 @@ import processing.core.PApplet;
  * Date: July 17, 2015
  * */
 public class EarthquakeCityMap extends PApplet {
-	
+
 	// We will use member variables, instead of local variables, to store the data
 	// that the setup and draw methods will need to access (as well as other methods)
 	// You will use many of these variables, but the only one you should need to add
 	// code to modify is countryQuakes, where you will store the number of earthquakes
 	// per country.
-	
+
 	// You can ignore this.  It's to get rid of eclipse warnings
 	private static final long serialVersionUID = 1L;
 
 	// IF YOU ARE WORKING OFFILINE, change the value of this variable to true
-	private static final boolean offline = false;
-	
-	/** This is where to find the local tiles, for working without an Internet connection */
+	private static final boolean offline = true;
+
+	/**
+	 * This is where to find the local tiles, for working without an Internet connection
+	 */
 	public static String mbTilesString = "blankLight-1-3.mbtiles";
-	
+
 	//feed with magnitude 2.5+ Earthquakes
 	private String earthquakesURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.atom";
-	
+
 	// The files containing city names and info and country names and info
 	private String cityFile = "city-data.json";
 	private String countryFile = "countries.geo.json";
-	
+
 	// The map
 	private UnfoldingMap map;
-	
+
 	// Markers for each city
 	private List<Marker> cityMarkers;
+
 	// Markers for each earthquake
 	private List<Marker> quakeMarkers;
 
 	// A List of country markers
 	private List<Marker> countryMarkers;
-	
+
 	// NEW IN MODULE 5
 	private CommonMarker lastSelected;
 	private CommonMarker lastClicked;
-	
-	public void setup() {		
+
+	public void setup() {
 		// (1) Initializing canvas and map tiles
 		size(900, 700, OPENGL);
 		if (offline) {
-		    map = new UnfoldingMap(this, 200, 50, 650, 600, new MBTilesMapProvider(mbTilesString));
-		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
-		}
-		else {
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.RoadProvider());
+			earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
+		} else {
 			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
-		    //earthquakesURL = "2.5_week.atom";
+			//earthquakesURL = "2.5_week.atom";
 		}
 		MapUtils.createDefaultEventDispatcher(this, map);
-		
-		
+
+
 		// (2) Reading in earthquake data and geometric properties
-	    //     STEP 1: load country features and markers
+		//     STEP 1: load country features and markers
 		List<Feature> countries = GeoJSONReader.loadData(this, countryFile);
 		countryMarkers = MapUtils.createSimpleMarkers(countries);
-		
+
 		//     STEP 2: read in city data
 		List<Feature> cities = GeoJSONReader.loadData(this, cityFile);
 		cityMarkers = new ArrayList<Marker>();
-		for(Feature city : cities) {
-		  cityMarkers.add(new CityMarker(city));
+		for (Feature city : cities) {
+			cityMarkers.add(new CityMarker(city));
 		}
-	    
-		//     STEP 3: read in earthquake RSS feed
-	    List<PointFeature> earthquakes = ParseFeed.parseEarthquake(this, earthquakesURL);
-	    quakeMarkers = new ArrayList<Marker>();
-	    
-	    for(PointFeature feature : earthquakes) {
-		  //check if LandQuake
-		  if(isLand(feature)) {
-		    quakeMarkers.add(new LandQuakeMarker(feature));
-		  }
-		  // OceanQuakes
-		  else {
-		    quakeMarkers.add(new OceanQuakeMarker(feature));
-		  }
-	    }
 
-	    // could be used for debugging
-	    printQuakes();
-	 		
-	    // (3) Add markers to map
-	    //     NOTE: Country markers are not added to the map.  They are used
-	    //           for their geometric properties
-	    map.addMarkers(quakeMarkers);
-	    map.addMarkers(cityMarkers);
-	    
+		//     STEP 3: read in earthquake RSS feed
+		List<PointFeature> earthquakes = ParseFeed.parseEarthquake(this, earthquakesURL);
+		quakeMarkers = new ArrayList<Marker>();
+
+		for (PointFeature feature : earthquakes) {
+			//check if LandQuake
+			if (isLand(feature)) {
+				quakeMarkers.add(new LandQuakeMarker(feature));
+			}
+			// OceanQuakes
+			else {
+				quakeMarkers.add(new OceanQuakeMarker(feature));
+			}
+		}
+
+		// could be used for debugging
+		printQuakes();
+
+		// (3) Add markers to map
+		//     NOTE: Country markers are not added to the map.  They are used
+		//           for their geometric properties
+		map.addMarkers(quakeMarkers);
+		map.addMarkers(cityMarkers);
+
 	}  // End setup
-	
-	
+
+	public List<Marker> getCityMarkers(){
+		return cityMarkers;
+	}
+
 	public void draw() {
 		background(0);
 		map.draw();
 		addKey();
-		
+
 	}
-	
-	/** Event handler that gets called automatically when the 
+
+	/**
+	 * Event handler that gets called automatically when the
 	 * mouse moves.
 	 */
 	@Override
-	public void mouseMoved()
-	{
+	public void mouseMoved() {
 		// clear the last selection
 		if (lastSelected != null) {
 			lastSelected.setSelected(false);
 			lastSelected = null;
-		
+
 		}
-		selectMarkerIfHover(quakeMarkers);
-		selectMarkerIfHover(cityMarkers);
+		if (!selectMarkerIfHover(quakeMarkers)) {
+			selectMarkerIfHover(cityMarkers);
+		}
 	}
-	
+
 	// If there is a marker under the cursor, and lastSelected is null 
 	// set the lastSelected to be the first marker found under the cursor
 	// Make sure you do not select two markers.
 	// 
-	private void selectMarkerIfHover(List<Marker> markers)
-	{
+	private boolean selectMarkerIfHover(List<Marker> markers) {
 		// TODO: Implement this method
-		for(Marker m : markers){
-			if(m.isInside(map, mouseX, mouseY)){
-				m.setSelected(true);
+		for (Marker m : markers) {
+			if (m.isInside(map, mouseX, mouseY)) {
 				lastSelected = (CommonMarker) m;
+				m.setSelected(true);
+				break;
 			}
 		}
+		if (lastSelected != null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
-	
-	/** The event handler for mouse clicks
+
+	/**
+	 * The event handler for mouse clicks
 	 * It will display an earthquake and its threat circle of cities
-	 * Or if a city is clicked, it will display all the earthquakes 
+	 * Or if a city is clicked, it will display all the earthquakes
 	 * where the city is in the threat circle
 	 */
 	@Override
-	public void mouseClicked()
-	{
+	public void mouseClicked() {
 		// TODO: Implement this method
 		// Hint: You probably want a helper method or two to keep this code
 		// from getting too long/disorganized
+		if (lastClicked != null) {
+			unhideMarkers();
+			lastClicked = null;
+		} else {
+			earthquakeClicked();
+			cityClicked();
+		}
+
+
 	}
-	
-	
+	//if earthquake marker is clicked, show  all cities within the threat circle
+	//of this earthquake (all other cities and earthquakes are hidden)
+	private void earthquakeClicked(){
+		for (Marker m1 : quakeMarkers) {
+			for (Marker m2 : cityMarkers) {
+				if (m1.isInside(map, mouseX, mouseY)) {
+					lastClicked = (CommonMarker) m1;
+					((CommonMarker) m1).setClicked(true);
+					for (int i = 0; i < quakeMarkers.size(); i++) {
+						Marker marker1 = quakeMarkers.get(i);
+						marker1.setHidden(true);
+					}
+					if (((EarthquakeMarker) m1).threatCircle() < distance(m1, m2) && lastClicked == m1) {
+						m2.setHidden(true);
+						m1.setHidden(false);
+					}
+				}
+			}
+		}
+	}
+	//if city marker is clicked, show that city marker and all quake markers
+	//within threat circle (all other cities and earthquakes are hidden)
+	private void cityClicked(){
+		for (Marker m1 : quakeMarkers) {
+			for (Marker m2 : cityMarkers) {
+				if (m2.isInside(map, mouseX, mouseY)) {
+					lastClicked = (CommonMarker) m2;
+					((CommonMarker) m2).setClicked(true);
+					for (int i = 0; i < cityMarkers.size(); i++) {
+						Marker marker2 = cityMarkers.get(i);
+						marker2.setHidden(true);
+					}
+					if (((EarthquakeMarker) m1).threatCircle() < distance(m1, m2) && lastClicked == m2) {
+						m1.setHidden(true);
+						m2.setHidden(false);
+					}
+				}
+			}
+		}
+	}
+
 	// loop over and unhide all markers
 	private void unhideMarkers() {
-		for(Marker marker : quakeMarkers) {
+		for (Marker marker : quakeMarkers) {
 			marker.setHidden(false);
 		}
-			
-		for(Marker marker : cityMarkers) {
+
+		for (Marker marker : cityMarkers) {
 			marker.setHidden(false);
 		}
 	}
+	//calculate a distance between two markers
+	private double distance(Marker m1, Marker m2) {
+		Location loc = m1.getLocation();
+		//double dist = ((EarthquakeMarker) m1).threatCircle();
+		double d = m2.getDistanceTo(loc);
+		return d;
+}
 	
 	// helper method to draw key in GUI
 	private void addKey() {	
