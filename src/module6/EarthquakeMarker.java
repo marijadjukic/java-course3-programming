@@ -3,6 +3,7 @@ package module6;
 import de.fhpotsdam.unfolding.data.PointFeature;
 import processing.core.PConstants;
 import processing.core.PGraphics;
+import java.util.*;
 
 /** Implements a visual marker for earthquakes on an earthquake map
  * 
@@ -10,7 +11,10 @@ import processing.core.PGraphics;
  *
  */
 // TODO: Implement the comparable interface
-public abstract class EarthquakeMarker extends CommonMarker
+	// errors occured in LandQuakeMarker and OceanQuakeMarker
+	// classes should be either declared as abstract
+	// or implement abstract method compareTo()
+public abstract class EarthquakeMarker extends CommonMarker implements Comparable<EarthquakeMarker>
 {
 	
 	// Did the earthquake occur on land?  This will be set by the subclasses.
@@ -56,7 +60,9 @@ public abstract class EarthquakeMarker extends CommonMarker
 	}
 	
 	// TODO: Add the method:
-	// public int compareTo(EarthquakeMarker marker)
+	public int compareTo(EarthquakeMarker marker){
+		return ((Float)marker.getMagnitude()).compareTo(this.getMagnitude());
+	}
 	
 	
 	// calls abstract method drawEarthquake and then checks age and draws X if needed

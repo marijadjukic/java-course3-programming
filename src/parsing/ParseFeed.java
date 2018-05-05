@@ -162,6 +162,7 @@ public class ParseFeed {
 			point.setId(columns[0]);
 			
 			// get other fields from csv
+			point.putProperty("id",columns[0]);
 			point.addProperty("name", columns[1]);
 			point.putProperty("city", columns[2]);
 			point.putProperty("country", columns[3]);
@@ -184,8 +185,34 @@ public class ParseFeed {
 		return features;
 		
 	}
-	
-	
+
+	public static List<PointFeature> parseAirplaneCrashes(PApplet p, String fileName) {
+		List<PointFeature> features = new ArrayList<PointFeature>();
+
+		String[] rows = p.loadStrings(fileName);
+		for (String row : rows) {
+
+			// split row by commas not in quotations
+			String[] columns = row.split(",");
+
+			// get location and create feature
+			float lat = Float.parseFloat(columns[2]);
+			float lon = Float.parseFloat(columns[3]);
+
+			Location loc = new Location(lat, lon);
+			PointFeature point = new PointFeature(loc);
+
+
+			// get fields from csv
+			point.putProperty("date",columns[0]);
+			point.addProperty("time", columns[1]);
+			point.putProperty("fatalities", columns[4]);
+			point.putProperty("operator", columns[5]);
+
+			features.add(point);
+		}
+		return features;
+	}
 
 	/*
 	 * This method is to parse a file containing airport route information.  

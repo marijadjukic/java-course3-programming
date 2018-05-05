@@ -24,21 +24,17 @@ import static java.lang.Math.abs;
  */
 public class OceanQuakeMarker extends EarthquakeMarker {
 	List<Marker> cityMarkers;
+	List<Marker> quakeMarkers;
 	UnfoldingMap map;
-
-	public OceanQuakeMarker(PointFeature quake) {
+	PointFeature quake;
+	public OceanQuakeMarker(PointFeature quake, UnfoldingMap map, List<Marker> cityMarkers, List<Marker> quakeMarkers) {
 		super(quake);
-		
+		this.quake = quake;
+		this.map = map;
+		this.cityMarkers = cityMarkers;
+		this.quakeMarkers = quakeMarkers;
 		// setting field in earthquake marker
 		isOnLand = false;
-		PApplet p = new PApplet();
-		String cityFile = "city-data.json";
-		List<Feature> cities = GeoJSONReader.loadData(p, cityFile);
-		cityMarkers = new ArrayList<Marker>();
-		map = new UnfoldingMap(p, 200, 50, 650, 600, new Microsoft.RoadProvider());
-		for (Feature city: cities) {
-			cityMarkers.add(new CityMarker(city));
-		}
 	}
 
 	/** Draw the earthquake as a square */
@@ -47,19 +43,15 @@ public class OceanQuakeMarker extends EarthquakeMarker {
 		pg.rect(x-radius, y-radius, 2*radius, 2*radius);
 		//draw a line between city marker (if clicked)
 		// and oceanquake marker within threat circle
-		for (Marker city: cityMarkers) {
-			Location loc1 = city.getLocation();
-			Location loc2 = new Location(x,y);
-			double dist = city.getDistanceTo(loc2);
-			if(clicked){
-				//if(dist<=threatCircle()){
-					ScreenPosition sp1 = map.getScreenPosition(city.getLocation());
-					ScreenPosition sp2 = new ScreenPosition(x,y);
-					pg.line(sp1.x-200+(sp2.x-x), sp1.y-50+(sp2.y-y),sp2.x,sp2.y);
-				//}
+		if(clicked){
+			for (Marker city: cityMarkers) {
+				double dist = city.getDistanceTo(quake.getLocation());
+				final CityMarker cityMarker = (CityMarker) city;
+				final ScreenPosition sp = cityMarker.getScreenPosition(map);
+				if(dist<=threatCircle()) {
+					pg.line(sp.x - 200, sp.y - 50, x, y);
+				}
 			}
-
 		}
-
 	}
 }

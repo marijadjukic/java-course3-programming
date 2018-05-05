@@ -15,6 +15,7 @@ import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
+import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import parsing.ParseFeed;
 import processing.core.PApplet;
 
@@ -103,7 +104,7 @@ public class EarthquakeCityMap extends PApplet {
 			}
 			// OceanQuakes
 			else {
-				quakeMarkers.add(new OceanQuakeMarker(feature));
+				quakeMarkers.add(new OceanQuakeMarker(feature,map,cityMarkers,quakeMarkers));
 			}
 		}
 
@@ -180,12 +181,11 @@ public class EarthquakeCityMap extends PApplet {
 		if (lastClicked != null) {
 			unhideMarkers();
 			lastClicked = null;
+			return;
 		} else {
 			earthquakeClicked();
 			cityClicked();
 		}
-
-
 	}
 	//if earthquake marker is clicked, show  all cities within the threat circle
 	//of this earthquake (all other cities and earthquakes are hidden)
@@ -199,7 +199,7 @@ public class EarthquakeCityMap extends PApplet {
 						Marker marker1 = quakeMarkers.get(i);
 						marker1.setHidden(true);
 					}
-					if (((EarthquakeMarker) m1).threatCircle() < distance(m1, m2) && lastClicked == m1) {
+					if (((EarthquakeMarker) m1).threatCircle() < m1.getDistanceTo(m2.getLocation()) && lastClicked == m1) {
 						m2.setHidden(true);
 						m1.setHidden(false);
 					}
@@ -219,7 +219,7 @@ public class EarthquakeCityMap extends PApplet {
 						Marker marker2 = cityMarkers.get(i);
 						marker2.setHidden(true);
 					}
-					if (((EarthquakeMarker) m1).threatCircle() < distance(m1, m2) && lastClicked == m2) {
+					if (((EarthquakeMarker) m1).threatCircle() < m1.getDistanceTo(m2.getLocation()) && lastClicked == m2) {
 						m1.setHidden(true);
 						m2.setHidden(false);
 					}
@@ -238,13 +238,6 @@ public class EarthquakeCityMap extends PApplet {
 			marker.setHidden(false);
 		}
 	}
-	//calculate a distance between two markers
-	private double distance(Marker m1, Marker m2) {
-		Location loc = m1.getLocation();
-		//double dist = ((EarthquakeMarker) m1).threatCircle();
-		double d = m2.getDistanceTo(loc);
-		return d;
-}
 	
 	// helper method to draw key in GUI
 	private void addKey() {	

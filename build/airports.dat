@@ -7451,7 +7451,6 @@
 8884,"Portovenere","Portovenere","Italy","",\N,44.0519359,9.8353078,10,1,"E","Europe/Rome"
 8885,"Amsterdam Zuid WTC","Amsterdam","Netherlands","",\N,52.338841,4.871471,10,1,"E","Europe/Amsterdam"
 8886,"Budapest Keteli","Budapest","Hungary","",\N,47.500497,19.085484,100,1,"E","Europe/Budapest"
-8887,"Zagreb Glavni Kolod.","Zagreb","Croatia","",\N,45.804289,15.979121,500,1,"E","Europe/Zagreb"
 8888,"Dillant Hopkins Airport","Keene","United States","EEN",\N,72.270833,42.898333,149,-5,"A",\N
 8889,"Tianshui Airport","Tianshui","China","THQ","ZLTS",34.333,105.514,9186,8,"N","Asia/Chongqing"
 8890,"Kawama Airport","Kawama","Cuba","","MUKW",23.123642,-81.301805,16,-5,"U","America/Havana"
@@ -8020,7 +8019,6 @@
 9454,"William F. Walsh Regional Transportation Center","Syracuse","United States","","SYTC",43.0767,-76.1691,380,-5,"A","America/New_York"
 9455,"Union Station","Utica","United States","UCA",\N,43.104167,-75.223333,456,-5,"A","America/New_York"
 9456,"Clinton Bus Stop","Clinton","United States","","CLTN",43.048889,-75.380278,604,-5,"A","America/New_York"
-9457,"Heuston Station","Dublin","Ireland","",\N,53.3463,-6.2927,19,0,"E","Europe/Dublin"
 9458,"Killarney Station","Killarney","Ireland","",\N,52.5089,-9.5015,144,0,"U","Europe/Dublin"
 9459,"Susquehanna Trailways Terminal","Williamsport","United States","","WSPT",41.239395,-77.000245,518,-5,"A","America/New_York"
 9460,"Martz Trailways Bus Terminal","Wilkes-Barre","United States","","WKBR",41.243958,-75.882365,525,-5,"A","America/New_York"
